@@ -1,0 +1,6 @@
+<!-- This is a footer component for the emplolyee portal. -->
+<aura:component implements="flexipage:AvailableForAllPageTypes" access="global">
+    <div class="slds-docked-form-footer">
+        <h1>Copyright © 2018 Incapsulate,LLC</h1>
+    </div>
+</aura:component>

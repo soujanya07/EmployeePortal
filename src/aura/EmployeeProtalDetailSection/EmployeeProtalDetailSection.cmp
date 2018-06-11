@@ -1,0 +1,139 @@
+<aura:component controller="EmployeePortalController" implements="flexipage:availableForRecordHome,force:lightningQuickActionWithoutHeader,force:hasRecordId" access="global">
+    <aura:attribute name="istruee" type="boolean"></aura:attribute>
+    <aura:attribute name="delemrId" type="id"></aura:attribute>
+    <aura:attribute name="countemergency" type="boolean"></aura:attribute>
+    <aura:attribute name="Record" type="Object"></aura:attribute>
+    <aura:attribute name="recordError" type="String"></aura:attribute>
+    <aura:attribute name="userdetails" type="Contact"></aura:attribute>
+    <aura:attribute name="userCertificatesdetails" type="String"></aura:attribute>    
+    <aura:attribute name="tab" type="String"></aura:attribute>
+    <aura:attribute name="emergencycontacts" type="Contact"></aura:attribute>
+    <aura:attribute name="getContacts" type="String[]"></aura:attribute>
+    
+    <aura:if isTrue="{!v.istruee}">
+        
+        <force:recordData aura:id="recordLoader"
+                          recordId="{!v.userdetails}"
+                          targetFields="{!v.Record}"
+                          layoutType="FULL"
+                          targetError="{!v.recordError}"
+                          recordUpdated="{!c.handleRecordUpdated}"/>
+        
+    </aura:if>
+    
+    <aura:handler event="c:FetchEmployeeDetails" action="{!c.UserPersonalDetailsEvent}" />
+    <!--<aura:handler event="c:UserPersonalDetails" action="{!c.UserCertificatesDetails}" />-->
+    <aura:handler name="init" value="this" action="{!c.UserPersonalDetailsEvent}"/>
+    <lightning:layoutItem padding="around-center" size="6">
+        <div class="page-section page-main">
+            <aura:if isTrue="{! and(v.tab == 'PersonalDetails',!empty(v.userdetails))}">
+                <br/>
+                <br/>
+                <div>
+                    <table border='5' style="width:180%;height:250px"> 
+                        <tr>                                    
+                            <td>First Name</td>
+                            <td>{!v.Record.FirstName}</td>
+                        </tr> 
+                        <tr>                                    
+                            <td>Last Name</td>
+                            <td>{!v.Record.LastName}</td>
+                        </tr>
+                        <tr>                                    
+                            <td>Designation</td>
+                            <td>{!v.Record.Designation__c}</td>
+                        </tr>
+                        <tr>                                    
+                            <td>Technology</td>
+                            <td>{!v.Record.Technology__c}</td>
+                        </tr>
+                        <tr>                                    
+                            <td>Social_Media_Link</td>
+                            <td>{!v.Record.Social_media_link__c}</td>
+                        </tr>
+                        <tr>                                    
+                            <td>Interests</td>
+                            <td>{!v.Record.Interests__c}</td>
+                        </tr>
+                    </table>
+                </div>
+            </aura:if>
+            <aura:if isTrue="{!and(v.tab == 'Certificates',!empty(v.userCertificatesdetails))}">
+                <br/>
+                <br/>
+                <table border='5' style="width:180%;height:90px"> 
+                    <tr>                                    
+                        <th>Name</th>
+                        <th>Link</th>
+                        <th>Vaild till</th>
+                    </tr>
+                    <aura:iteration items="{!v.userCertificatesdetails}" var="details">
+                        <tr>                                    
+                            <!--<td>{!details.Certificate_Name__c}</td> <th>Name</th>-->
+                            <td>{!details.Name}</td>
+                            <td>{!details.Link__c}</td>
+                            <td>{!details.Valid_till__c}</td>
+                        </tr>
+                    </aura:iteration>
+                </table>
+                <br/>
+                <c:EmployeeModal />
+                <!--<c:Modal ></c:Modal> -->
+            </aura:if>
+            <aura:if isTrue="{!v.countemergency}">
+                <force:recordData aura:id="delemergencycon"
+                                  recordId="{!v.delemrId}"
+                                  fields="Id"
+                                  targetError="{!v.recordError}"
+                                  recordUpdated="{!c.emer_con_update}" />
+            </aura:if>
+            
+            <aura:if isTrue="{!and(v.tab == 'Emergencycontact',!empty(v.emergencycontacts))}">
+                <br/>
+                <br/>
+                <table border='5' style="width:180%;height:120px"> 
+                    <tr>                                    
+                        <th>Name</th> 
+                        <th>Number</th>
+                        <th>Email</th>
+                        <th>Relationship</th>
+                        <th>Delete</th>
+                    </tr>
+                    <aura:iteration items="{!v.emergencycontacts}" var="details">
+                        <tr>                                    
+                            <td>{!details.Name__c}</td>
+                            <td>{!details.Phone}</td>
+                            <td>{!details.Email}</td>
+                            <td>{!details.Relationship__c}</td>
+                            <td><lightning:button label="Delete" value="{!details.Id}" onclick="{!c.deleteEmergencyContacts}"></lightning:button></td>
+                        </tr>
+                    </aura:iteration>
+                </table>
+            </aura:if>
+            
+            <aura:if isTrue="{!(v.tab == 'knowYourColleagues')}">
+                <br/>
+                
+                <lightning:input aura:id="keyword" label="Keyword" name="enter-search" onchange="{!c.searchContact}" type="search"/>
+                <aura:iteration items="{!v.getContacts}" var="details">
+                    <ul class="slds-has-dividers_bottom-space">
+                        <li class="slds-item">
+                            <table border='5' style="width:180%;height:90px"> 
+                                <tr>                                    
+                                    <th>Name</th> 
+                                    <th>Number of certificates</th>
+                                    <th>More</th>
+                                </tr>
+                                <tr>
+                                    <td><lightning:tile label="{!details.Name}" href="{!c.searchContact}"></lightning:tile></td>
+                                    <td><lightning:tile label="{!details.Total_No_of_Certificates__c}"></lightning:tile></td>
+                                    <td><lightning:button value="{!details.Id}" variant="base" label="show more Details" title="Base action" onclick="{! c.colleaguesDetails }"/></td>
+                                </tr><!-- <c:SamplePager/> -->
+                            </table> 
+                        </li>
+                    </ul>
+                </aura:iteration>
+            </aura:if>
+        </div>
+    </lightning:layoutItem>
+</aura:component>
